@@ -2,6 +2,10 @@
 
 It is a simple artificial neural network implementation using CUDA technology. This repository was created for the blog post available at [luniak.io/cuda-neural-network-implementation-part-1](http://luniak.io/cuda-neural-network-implementation-part-1) where much more information on this implementation can be found. It is just an educational implementation that has many performance issues and a lot can be improved.
 
+## Execution
+
+nvcc -I /usr/local/cuda/include -L /usr/local/cuda/lib main.cu nn_utils/matrix.cu nn_utils/bce_cost.cu nn_utils/shape.cu coordinates_dataset.cu neural_network.cu layers/linear_layer.cu layers/relu_activation.cu layers/sigmoid_activation.cu -std=c++11 -D_MWAITXINTRIN_H_INCLUDED
+
 ## Requirements and Technical Info
 
 This repository contains **Eclipse Nsight** project.
