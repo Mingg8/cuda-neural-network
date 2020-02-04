@@ -11,6 +11,17 @@ NeuralNetwork::~NeuralNetwork() {
 	}
 }
 
+void NeuralNetwork::initalizeWeights(std::vector<Matrix> weights, std::vector<Matrix> biases) {
+	layers[0]->initializeWeight(weights[0]);
+	layers[0]->initializeBias(biases[0]);
+	layers[2]->initializeWeight(weights[1]);
+	layers[2]->initializeBias(biases[1]);
+	layers[4]->initializeWeight(weights[2]);
+	layers[4]->initializeBias(biases[2]);
+	layers[6]->initializeWeight(weights[3]);
+	layers[6]->initializeBias(biases[3]);
+}
+
 void NeuralNetwork::addLayer(NNLayer* layer) {
 	this->layers.push_back(layer);
 }

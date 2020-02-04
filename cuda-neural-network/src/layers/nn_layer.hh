@@ -11,6 +11,9 @@ protected:
 public:
 	virtual ~NNLayer() = 0;
 
+	virtual void initializeWeight(Matrix& W_input) = 0;
+	virtual void initializeBias(Matrix& b_input) = 0;
+
 	virtual Matrix& forward(Matrix& A) = 0;
 	virtual Matrix& backprop(Matrix& dZ, float learning_rate) = 0;
 

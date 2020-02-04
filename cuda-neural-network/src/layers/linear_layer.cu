@@ -47,10 +47,11 @@ __global__ void linearLayerBackprop(float* W, float* dZ, float *dA,
 	}
 }
 
+
 __global__ void linearLayerUpdateWeights(  float* dZ, float* A, float* W,
-										   int dZ_x_dim, int dZ_y_dim,
-										   int A_x_dim, int A_y_dim,
-										   float learning_rate) {
+	int dZ_x_dim, int dZ_y_dim,
+	int A_x_dim, int A_y_dim,
+	float learning_rate) {
 
 	int col = blockIdx.x * blockDim.x + threadIdx.x;
 	int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -69,6 +70,12 @@ __global__ void linearLayerUpdateWeights(  float* dZ, float* A, float* W,
 	}
 }
 
+__global__ void linearLayerSetWeights(float* W, float* W_input, int W_x_dim) {
+	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	int row = blockIdx.y * blockDim.y + threadIdx.y;
+	W[row * W_x_dim + col] = W_input[row * W_x_dim + col];
+}
+
 __global__ void linearLayerUpdateBias(  float* dZ, float* b,
 										int dZ_x_dim, int dZ_y_dim,
 										int b_x_dim,
@@ -80,6 +87,11 @@ __global__ void linearLayerUpdateBias(  float* dZ, float* b,
 		int dZ_y = index / dZ_x_dim;
 		atomicAdd(&b[dZ_y], - learning_rate * (dZ[dZ_y * dZ_x_dim + dZ_x] / dZ_x_dim));
 	}
+}
+
+__global__ void linearLayerSetBias(float* b, float* b_input) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+	b[index] = b_input[index];
 }
 
 LinearLayer::LinearLayer(std::string name, Shape W_shape) :
@@ -179,6 +191,15 @@ void LinearLayer::updateWeights(Matrix& dZ, float learning_rate) {
 															learning_rate);
 }
 
+void LinearLayer::initializeWeight(Matrix& W_input) {
+	dim3 block_size(8, 8);
+	dim3 num_of_blocks( (W_input.shape.x + block_size.x - 1) / block_size.x,
+						(W_input.shape.y + block_size.y - 1) / block_size.y);
+	linearLayerSetWeights<<<num_of_blocks, block_size>>>(W.data_device.get(),
+														W_input.data_device.get(),
+														W.shape.x);
+}
+
 void LinearLayer::updateBias(Matrix& dZ, float learning_rate) {
 	dim3 block_size(256);
 	dim3 num_of_blocks( (dZ.shape.y * dZ.shape.x + block_size.x - 1) / block_size.x);
@@ -186,6 +207,16 @@ void LinearLayer::updateBias(Matrix& dZ, float learning_rate) {
 														 b.data_device.get(),
 														 dZ.shape.x, dZ.shape.y,
 														 b.shape.x, learning_rate);
+	W.copyHostToDevice();
+}
+
+void LinearLayer::initializeBias(Matrix& b_input) {
+	dim3 block_size(256);
+	dim3 num_of_blocks( (b_input.shape.y * b_input.shape.x + block_size.x - 1) / block_size.x);
+	linearLayerSetBias<<<num_of_blocks, block_size>>> (b.data_device.get(),
+															b_input.data_device.get());
+	
+	b.copyHostToDevice();
 }
 
 int LinearLayer::getXDim() const {

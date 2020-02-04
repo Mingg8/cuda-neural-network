@@ -15,4 +15,7 @@ public:
 
 	Matrix& forward(Matrix& Z);
 	Matrix& backprop(Matrix& dA, float learning_rate = 0.01);
+
+	void initializeWeight(Matrix& W_input);
+	void initializeBias(Matrix& b_input);
 };

@@ -58,3 +58,10 @@ Matrix& ReLUActivation::backprop(Matrix& dA, float learning_rate) {
 
 	return dZ;
 }
+
+void ReLUActivation::initializeWeight(Matrix& W_input) {
+	return;
+}
+void ReLUActivation::initializeBias(Matrix& b_input){
+	return;
+}

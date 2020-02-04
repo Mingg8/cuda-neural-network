@@ -20,36 +20,43 @@ int main() {
 	BCECost bce_cost;
 
 	NeuralNetwork nn;
-	nn.addLayer(new LinearLayer("linear_1", Shape(2, 30)));
+	nn.addLayer(new LinearLayer("linear_1", Shape(3, 64)));
 	nn.addLayer(new ReLUActivation("relu_1"));
-	nn.addLayer(new LinearLayer("linear_2", Shape(30, 1)));
-	nn.addLayer(new SigmoidActivation("sigmoid_output"));
+	nn.addLayer(new LinearLayer("linear_2", Shape(64, 64)));
+	nn.addLayer(new ReLUActivation("sigmoid_output"));
+	nn.addLayer(new LinearLayer("linear_3", shape(64, 64)));
+	nn.addLayer(new TanhLayer("tanh_output"));
 
 	// network training
 	Matrix Y;
-	for (int epoch = 0; epoch < 1001; epoch++) {
-		float cost = 0.0;
+	// for (int epoch = 0; epoch < 1001; epoch++) {
+	// 	float cost = 0.0;
 
-		for (int batch = 0; batch < dataset.getNumOfBatches() - 1; batch++) {
-			Y = nn.forward(dataset.getBatches().at(batch));
-			nn.backprop(Y, dataset.getTargets().at(batch));
-			cost += bce_cost.cost(Y, dataset.getTargets().at(batch));
-		}
+	// 	for (int batch = 0; batch < dataset.getNumOfBatches() - 1; batch++) {
+	// 		Y = nn.forward(dataset.getBatches().at(batch));
+	// 		nn.backprop(Y, dataset.getTargets().at(batch));
+	// 		cost += bce_cost.cost(Y, dataset.getTargets().at(batch));
+	// 	}
 
-		if (epoch % 100 == 0) {
-			std::cout 	<< "Epoch: " << epoch
-						<< ", Cost: " << cost / dataset.getNumOfBatches()
-						<< std::endl;
-		}
-	}
+	// 	if (epoch % 100 == 0) {
+	// 		std::cout 	<< "Epoch: " << epoch
+	// 					<< ", Cost: " << cost / dataset.getNumOfBatches()
+	// 					<< std::endl;
+	// 	}
+	// }
+
+	// TODO: set values in weights (linear_layer -> updateWeights)
+	std::vector<Matrix> weights, biases;
+	
+	nn.initializeWeights(weights, biases);
 
 	// compute accuracy
 	Y = nn.forward(dataset.getBatches().at(dataset.getNumOfBatches() - 1));
 	Y.copyDeviceToHost();
 
-	float accuracy = computeAccuracy(
-			Y, dataset.getTargets().at(dataset.getNumOfBatches() - 1));
-	std::cout 	<< "Accuracy: " << accuracy << std::endl;
+	// float accuracy = computeAccuracy(
+	// 		Y, dataset.getTargets().at(dataset.getNumOfBatches() - 1));
+	// std::cout 	<< "Accuracy: " << accuracy << std::endl;
 
 	return 0;
 }
@@ -67,3 +74,27 @@ float computeAccuracy(const Matrix& predictions, const Matrix& targets) {
 
 	return static_cast<float>(correct_predictions) / m;
 }
+
+
+
+// void initializeWeightsRandomly(Matrix &W) {
+// 	std::default_random_engine generator;
+// 	std::normal_distribution<float> normal_distribution(0.0, 1.0);
+
+// 	for (int x = 0; x < W.shape.x; x++) {
+// 		for (int y = 0; y < W.shape.y; y++) {
+// 			W[y * W.shape.x + x] = normal_distribution(generator) * weights_init_threshold;
+// 		}
+// 	}
+
+// 	W.copyHostToDevice();
+// }
+
+
+// void LinearLayer::initializeBiasWithZeros() {
+// 	for (int x = 0; x < b.shape.x; x++) {
+// 		b[x] = 0;
+// 	}
+
+// 	b.copyHostToDevice();
+// }
