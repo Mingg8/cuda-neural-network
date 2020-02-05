@@ -6,23 +6,45 @@
 #include "linear_layer.hh"
 #include "../nn_utils/nn_exception.hh"
 
+using namespace std;
+
 __global__ void linearLayerForward( float* W, float* A, float* Z, float* b,
 									int W_x_dim, int W_y_dim,
 									int A_x_dim, int A_y_dim) {
 
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	int col = blockIdx.y * blockDim.y + threadIdx.y;
+	int row = blockIdx.x * blockDim.x + threadIdx.x;
 
 	int Z_x_dim = A_x_dim;
 	int Z_y_dim = W_y_dim;
 
 	float Z_value = 0;
 
-	if (row < Z_y_dim && col < Z_x_dim) {
+	if (row < Z_x_dim && col < Z_y_dim) {
 		for (int i = 0; i < W_x_dim; i++) {
-			Z_value += W[row * W_x_dim + i] * A[i * A_x_dim + col];
+			Z_value += A[row * A_y_dim + i] * W[i * W_y_dim + col];
 		}
-		Z[row * Z_x_dim + col] = Z_value + b[row];
+		Z[row * Z_y_dim + col] = Z_value + b[col];
+	}
+}
+
+__global__ void linearLayerNormal( float* W, float* A, float* Z, float* b,
+	int W_x_dim, int W_y_dim,
+	int A_x_dim, int A_y_dim) {
+
+	int col = blockIdx.y * blockDim.y + threadIdx.y;
+	int row = blockIdx.x * blockDim.x + threadIdx.x;
+
+	int Z_x_dim = W_x_dim;
+	int Z_y_dim = A_x_dim;
+
+	float Z_value = 0;
+
+	if (row < Z_x_dim && col < Z_y_dim) {
+		for (int i = 0; i < W_x_dim; i++) {
+			Z_value += W[row * A_y_dim + i] * A[col * W_y_dim + i];
+		}
+		Z[row * Z_y_dim + col] = Z_value;
 	}
 }
 
@@ -129,10 +151,37 @@ Matrix& LinearLayer::forward(Matrix& A) {
 	return Z;
 }
 
+Matrix& LinearLayer::normal(Matrix& N) {
+	assert(W.shape.y == N.shape.y);
+
+	this->N = N;
+	Shape Z_shape(W.shape.x, N.shape.x);
+	Z_n.allocateMemoryIfNotAllocated(Z_shape);
+
+	computeAndStoreLayerOutput_normal(N);
+	NNException::throwIfDeviceErrorsOccurred("Cannot perform linear layer forward propagation.");
+
+	return Z_n;
+}
+
+void LinearLayer::computeAndStoreLayerOutput_normal(Matrix& N) {
+	dim3 block_size(8, 8);
+	dim3 num_of_blocks(	(Z_n.shape.x + block_size.x - 1) / block_size.x,
+						(Z_n.shape.y + block_size.y - 1) / block_size.y);
+
+	linearLayerNormal<<<num_of_blocks, block_size>>>( W.data_device.get(),
+													   N.data_device.get(),
+													   Z_n.data_device.get(),
+													   b.data_device.get(),
+													   W.shape.x, W.shape.y,
+													   N.shape.x, N.shape.y);
+}
+
 void LinearLayer::computeAndStoreLayerOutput(Matrix& A) {
 	dim3 block_size(8, 8);
 	dim3 num_of_blocks(	(Z.shape.x + block_size.x - 1) / block_size.x,
 						(Z.shape.y + block_size.y - 1) / block_size.y);
+
 	linearLayerForward<<<num_of_blocks, block_size>>>( W.data_device.get(),
 													   A.data_device.get(),
 													   Z.data_device.get(),

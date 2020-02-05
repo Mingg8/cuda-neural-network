@@ -11,6 +11,14 @@ __global__ void reluActivationForward(float* Z, float* A,
 	}
 }
 
+__global__ void reluActivationNormal(float* Z, float* A,
+	int Z_x_dim, int Z_y_dim) {
+
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+	A[index] =  (Z[index] > 0 ? 1 : 0);
+}
+
 __global__ void reluActivationBackprop(float* Z, float* dA, float* dZ,
 									   int Z_x_dim, int Z_y_dim) {
 
@@ -44,6 +52,22 @@ Matrix& ReLUActivation::forward(Matrix& Z) {
 	NNException::throwIfDeviceErrorsOccurred("Cannot perform ReLU forward propagation.");
 
 	return A;
+}
+
+Matrix& ReLUActivation::normal(Matrix& Z_n, Matrix& dh) {
+	// relu_diff(Z_n) .* dh
+	this->Z_n = Z_n;
+	this->dh = dh;
+	A_n.allocateMemoryIfNotAllocated(Z_n.shape.x, );
+
+	dim3 block_size(256);
+	dim3 num_of_blocks((Z_n.shape.y * Z_n.shape.x + block_size.x - 1) / block_size.x);
+
+	reluActivationNormal<<<num_of_blocks, block_size>>>(Z_n.data_device.get(), A_n.data_device.get(),
+														 Z_n.shape.x, Z_n.shape.y);
+	NNException::throwIfDeviceErrorsOccurred("Cannot perform ReLU forward propagation.");
+
+	return A_n;
 }
 
 Matrix& ReLUActivation::backprop(Matrix& dA, float learning_rate) {

@@ -6,7 +6,6 @@
 namespace testutils {
 
 	void initializeTensorWithValue(Matrix M, float value);
-	void initializeTensorWithMatrix(Matrix M, Matrix M_input);
 	void initializeTensorRandomlyInRange(Matrix M, float min, float max);
 	void initializeEachTensorRowWithValue(Matrix M, std::vector<float> values);
 	void initializeEachTensorColWithValue(Matrix M, std::vector<float> values);

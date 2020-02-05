@@ -15,15 +15,23 @@ void NeuralNetwork::addLayer(NNLayer* layer) {
 	this->layers.push_back(layer);
 }
 
-Matrix NeuralNetwork::forward(Matrix X) {
+void NeuralNetwork::forward(Matrix X, Matrix& output, Matrix& normal) {
 	Matrix Z = X;
 
-	for (auto layer : layers) {
-		Z = layer->forward(Z);
-	}
+	Matrix a1 = layers[0]->forward(Z);
+	Matrix a2 = layers[1]->forward(a1);
+	a2 = layers[2]->forward(a2);
+	Matrix a3 = layers[3]->forward(a2);
+	a3 = layers[4]->forward(a3);
+	Matrix a4 = layers[5]->forward(a3);
+	a4 = layers[6]->forward(a4);
+	output = layers[7]->forward(a4);
 
-	Y = Z;
-	return Y;
+	Matrix dh4 = layers[7]->normal(a4); // N x 1
+	dh4 = layers[6]->normal(dh4); // (64 x 1) x (N x 1)'
+	Matrix dh3 = layers[5]->normal(a5, dh4);
+	dh3 = layers[4]->normal(dh3);
+	normal = dh4;
 }
 
 void NeuralNetwork::backprop(Matrix predictions, Matrix target) {

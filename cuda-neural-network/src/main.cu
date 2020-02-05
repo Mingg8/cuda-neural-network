@@ -1,12 +1,16 @@
 #include <iostream>
 #include <time.h>
+#include <vector>
+#include <chrono>
 
 #include "neural_network.hh"
 #include "layers/linear_layer.hh"
 #include "layers/relu_activation.hh"
-#include "layers/sigmoid_activation.hh"
+#include "layers/tanh_activation.hh"
 #include "nn_utils/nn_exception.hh"
 #include "nn_utils/bce_cost.hh"
+#include "file_io.hh"
+#include "../../cuda-neural-network-test/test/test_utils.hh"
 
 #include "coordinates_dataset.hh"
 
@@ -15,41 +19,89 @@ float computeAccuracy(const Matrix& predictions, const Matrix& targets);
 int main() {
 
 	srand( time(NULL) );
-
-	CoordinatesDataset dataset(100, 21);
-	BCECost bce_cost;
+	int rows = 1;
+	Matrix X(rows, 3);
+	X.allocateMemory();
 
 	NeuralNetwork nn;
-	nn.addLayer(new LinearLayer("linear_1", Shape(2, 30)));
-	nn.addLayer(new ReLUActivation("relu_1"));
-	nn.addLayer(new LinearLayer("linear_2", Shape(30, 1)));
-	nn.addLayer(new SigmoidActivation("sigmoid_output"));
+	LinearLayer* linear_layer_1 = new LinearLayer("linear_layer_1", Shape(3, 64));
+	ReLUActivation* relu_layer_1 = new ReLUActivation("relu_layer_1");
+	LinearLayer* linear_layer_2 = new LinearLayer("linear_layer_2", Shape(64, 64));
+	ReLUActivation* relu_layer_2 = new ReLUActivation("relu_layer_2");
+	LinearLayer* linear_layer_3 = new LinearLayer("linear_layer_3", Shape(64, 64));
+	ReLUActivation* relu_layer_3 = new ReLUActivation("relu_layer_3");
+	LinearLayer* linear_layer_4 = new LinearLayer("linear_layer_4", Shape(64, 1));
+	TanhActivation* tanh_layer = new TanhActivation("tanh_layer");
 
-	// network training
-	Matrix Y;
-	for (int epoch = 0; epoch < 1001; epoch++) {
-		float cost = 0.0;
+	std::vector<Matrix> weights, biases;
+	Matrix input_coeff, output_coeff;
+	loadWeight(weights, biases);
+	loadNormalizationCoeff(input_coeff, output_coeff);
 
-		for (int batch = 0; batch < dataset.getNumOfBatches() - 1; batch++) {
-			Y = nn.forward(dataset.getBatches().at(batch));
-			nn.backprop(Y, dataset.getTargets().at(batch));
-			cost += bce_cost.cost(Y, dataset.getTargets().at(batch));
-		}
+	testutils::initializeTensorWithValue(X, 1.0f);
+	X[0] = 0.0165;
+	X[1] = 0.0165;
+	X[2] = 0.0371;
 
-		if (epoch % 100 == 0) {
-			std::cout 	<< "Epoch: " << epoch
-						<< ", Cost: " << cost / dataset.getNumOfBatches()
-						<< std::endl;
-		}
-	}
+	normalize(X, input_coeff);
 
-	// compute accuracy
-	Y = nn.forward(dataset.getBatches().at(dataset.getNumOfBatches() - 1));
+	Matrix a = weights[0];
+	testutils::initializeTensorWithMatrix(linear_layer_1->W, weights[0]);
+	testutils::initializeTensorWithMatrix(linear_layer_2->W, weights[1]);
+	testutils::initializeTensorWithMatrix(linear_layer_3->W, weights[2]);
+	testutils::initializeTensorWithMatrix(linear_layer_4->W, weights[3]);
+
+	testutils::initializeTensorWithMatrix(linear_layer_1->b, biases[0]);
+	testutils::initializeTensorWithMatrix(linear_layer_2->b, biases[1]);
+	testutils::initializeTensorWithMatrix(linear_layer_3->b, biases[2]);
+	testutils::initializeTensorWithMatrix(linear_layer_4->b, biases[3]);
+
+	X.copyHostToDevice();
+	linear_layer_1->W.copyHostToDevice();
+	linear_layer_2->W.copyHostToDevice();
+	linear_layer_3->W.copyHostToDevice();
+	linear_layer_4->W.copyHostToDevice();
+
+	linear_layer_1->b.copyHostToDevice();
+	linear_layer_2->b.copyHostToDevice();
+	linear_layer_3->b.copyHostToDevice();
+	linear_layer_4->b.copyHostToDevice();
+
+	nn.addLayer(linear_layer_1);
+	nn.addLayer(relu_layer_1);
+	nn.addLayer(linear_layer_2);
+	nn.addLayer(relu_layer_2);
+	nn.addLayer(linear_layer_3);
+	nn.addLayer(relu_layer_3);
+	nn.addLayer(linear_layer_4);
+	nn.addLayer(tanh_layer);
+
+	auto start = chrono::steady_clock::now();
+	
+	Matrix Y, N;
+	nn.forward(X, Y, N);
 	Y.copyDeviceToHost();
+	N.copyDeviceToHost();
+	unnormalize(Y, output_coeff);
+	auto end = chrono::steady_clock::now();
 
-	float accuracy = computeAccuracy(
-			Y, dataset.getTargets().at(dataset.getNumOfBatches() - 1));
-	std::cout 	<< "Accuracy: " << accuracy << std::endl;
+	cout << "Elapsed time (microseconds) : "
+		<< chrono::duration_cast<chrono::microseconds>(end - start).count()
+		<< " (us) " << endl;
+
+	cout << "shape: " << N.shape.x << ", " << N.shape.y << endl;
+
+	cout << N[0] << ", "
+		<< N[1]  << ", "
+		<< N[2]  << ", "
+		<< N[3]  << ", "
+		<< N[4]  << ", "
+		<< N[60]  << ", "
+		<< N[61]  << ", "
+		<< N[62]  << ", "
+		<< N[63]  << ", "
+		<< endl;
+
 
 	return 0;
 }
