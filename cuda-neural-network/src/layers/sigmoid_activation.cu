@@ -61,9 +61,9 @@ Matrix& SigmoidActivation::backprop(Matrix& dA, float learning_rate) {
 }
 
 
-void SigmoidActivation::initializeWeight(Matrix& W_input) {
+void SigmoidActivation::initializeWeight(Matrix W_input) {
 	return;
 }
-void SigmoidActivation::initializeBias(Matrix& b_input){
+void SigmoidActivation::initializeBias(Matrix b_input){
 	return;
 }

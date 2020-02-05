@@ -100,8 +100,8 @@ LinearLayer::LinearLayer(std::string name, Shape W_shape) :
 	this->name = name;
 	b.allocateMemory();
 	W.allocateMemory();
-	initializeBiasWithZeros();
-	initializeWeightsRandomly();
+	// initializeBiasWithZeros();
+	// initializeWeightsRandomly();
 }
 
 LinearLayer::~LinearLayer()
@@ -191,7 +191,7 @@ void LinearLayer::updateWeights(Matrix& dZ, float learning_rate) {
 															learning_rate);
 }
 
-void LinearLayer::initializeWeight(Matrix& W_input) {
+void LinearLayer::initializeWeight(Matrix W_input) {
 	dim3 block_size(8, 8);
 	dim3 num_of_blocks( (W_input.shape.x + block_size.x - 1) / block_size.x,
 						(W_input.shape.y + block_size.y - 1) / block_size.y);
@@ -210,7 +210,7 @@ void LinearLayer::updateBias(Matrix& dZ, float learning_rate) {
 	W.copyHostToDevice();
 }
 
-void LinearLayer::initializeBias(Matrix& b_input) {
+void LinearLayer::initializeBias(Matrix b_input) {
 	dim3 block_size(256);
 	dim3 num_of_blocks( (b_input.shape.y * b_input.shape.x + block_size.x - 1) / block_size.x);
 	linearLayerSetBias<<<num_of_blocks, block_size>>> (b.data_device.get(),

@@ -42,8 +42,8 @@ public:
 	Matrix getWeightsMatrix() const;
 	Matrix getBiasVector() const;
 
-	void initializeWeight(Matrix& W_input);
-	void initializeBias(Matrix& b_input);
+	void initializeWeight(Matrix W_input);
+	void initializeBias(Matrix b_input);
 
 	// for unit testing purposes only
 	friend class LinearLayerTest_ShouldReturnOutputAfterForwardProp_Test;
