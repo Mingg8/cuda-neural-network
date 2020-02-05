@@ -19,7 +19,7 @@ public:
 
 	Matrix forward(Matrix X);
 	void backprop(Matrix predictions, Matrix target);
-	void initalizeWeights(std::vector<Matrix> weights, std::vector<Matrix> biases);
+	void initializeWeights(std::vector<Matrix> weights, std::vector<Matrix> biases);
 
 	void addLayer(NNLayer *layer);
 	std::vector<NNLayer*> getLayers() const;
