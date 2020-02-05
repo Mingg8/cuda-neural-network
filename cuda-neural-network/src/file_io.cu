@@ -176,3 +176,17 @@ void unnormalize(Matrix &output, Matrix output_coeff) {
         output[i] = (output[i] - output_coeff[4]) / output_coeff[0];
     }
 }
+
+void unnormalize_normal(Matrix &output, Matrix input_coeff) {
+    for (size_t i = 0; i < output.shape.y; i++) {
+        float sum = 0.0f;
+        for (size_t j =0 ; j < output.shape.x; j++) {
+            float a = output[j * output.shape.y + i] * input_coeff[j];
+            output[j * output.shape.x + i] = a;
+            sum += a * a;
+        }
+        for (size_t j =0 ; j < output.shape.x; j++) {
+            output[j * output.shape.x + i] /= sqrt(sum);
+        }
+    }
+}

@@ -36,13 +36,14 @@ __global__ void linearLayerNormal( float* W, float* A, float* Z, float* b,
 	int row = blockIdx.x * blockDim.x + threadIdx.x;
 
 	int Z_x_dim = W_x_dim;
-	int Z_y_dim = A_x_dim;
+	int Z_y_dim = A_y_dim;
 
 	float Z_value = 0;
 
 	if (row < Z_x_dim && col < Z_y_dim) {
-		for (int i = 0; i < W_x_dim; i++) {
-			Z_value += W[row * A_y_dim + i] * A[col * W_y_dim + i];
+
+		for (int i = 0; i < W_y_dim; i++) {
+			Z_value += W[row * W_y_dim + i] * A[i * A_y_dim + col];
 		}
 		Z[row * Z_y_dim + col] = Z_value;
 	}
@@ -152,10 +153,10 @@ Matrix& LinearLayer::forward(Matrix& A) {
 }
 
 Matrix& LinearLayer::normal(Matrix& N) {
-	assert(W.shape.y == N.shape.y);
+	assert(W.shape.y == N.shape.x);
 
 	this->N = N;
-	Shape Z_shape(W.shape.x, N.shape.x);
+	Shape Z_shape(W.shape.x, N.shape.y);
 	Z_n.allocateMemoryIfNotAllocated(Z_shape);
 
 	computeAndStoreLayerOutput_normal(N);

@@ -38,6 +38,7 @@ public:
 
 	Matrix& forward(Matrix& A);
 	Matrix& normal(Matrix& N);
+	Matrix& normal_relu(Matrix& Z_n, Matrix& dh){return Z;};
 	Matrix& backprop(Matrix& dZ, float learning_rate = 0.01);
 
 	int getXDim() const;

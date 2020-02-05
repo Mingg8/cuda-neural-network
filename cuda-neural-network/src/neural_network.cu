@@ -29,9 +29,14 @@ void NeuralNetwork::forward(Matrix X, Matrix& output, Matrix& normal) {
 
 	Matrix dh4 = layers[7]->normal(a4); // N x 1
 	dh4 = layers[6]->normal(dh4); // (64 x 1) x (N x 1)'
-	Matrix dh3 = layers[5]->normal(a5, dh4);
+	Matrix dh3 = layers[5]->normal_relu(a3, dh4);
 	dh3 = layers[4]->normal(dh3);
-	normal = dh4;
+	Matrix dh2 = layers[3]->normal_relu(a2, dh3);
+	dh2 = layers[2]->normal(dh2);
+	Matrix dh1 = layers[1]->normal_relu(a1, dh2);
+	dh1 = layers[0]->normal(dh1);
+
+	normal = dh1;
 }
 
 void NeuralNetwork::backprop(Matrix predictions, Matrix target) {
@@ -47,4 +52,29 @@ void NeuralNetwork::backprop(Matrix predictions, Matrix target) {
 
 std::vector<NNLayer*> NeuralNetwork::getLayers() const {
 	return layers;
+}
+
+
+void NeuralNetwork::setCoeffs(Matrix& input, Matrix& output) {
+	input_coeff = input;
+	output_coeff = output;
+}
+
+Matrix NeuralNetwork::normalize(Matrix &pnts) {
+	this->pnts = pnts;
+
+	normalized_pnts.allocateMemoryIfNotAllocated(pnts.shape);
+
+	dim3 block_size(8, 8);
+	dim3 num_of_blocks( (pnts.shape.x + block_size.x - 1) / block_size.x,
+						(pnts.shape.y + block_size.y - 1) / block_size.y);
+
+    for (size_t i = 0; i < pnts.shape.x; i++) {
+        for (size_t j = 0; j < pnts.shape.y; j++) {
+            pnts[i * pnts.shape.y + j] = pnts[i * pnts.shape.y + j]
+                * input_coeff[j] + input_coeff[j + 3];
+        }
+	}
+	
+	return normalized_pnts;
 }

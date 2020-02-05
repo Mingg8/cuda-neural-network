@@ -19,9 +19,7 @@ float computeAccuracy(const Matrix& predictions, const Matrix& targets);
 int main() {
 
 	srand( time(NULL) );
-	int rows = 1;
-	Matrix X(rows, 3);
-	X.allocateMemory();
+	int rows = 4000;
 
 	NeuralNetwork nn;
 	LinearLayer* linear_layer_1 = new LinearLayer("linear_layer_1", Shape(3, 64));
@@ -37,13 +35,10 @@ int main() {
 	Matrix input_coeff, output_coeff;
 	loadWeight(weights, biases);
 	loadNormalizationCoeff(input_coeff, output_coeff);
+	input_coeff.copyHostToDevice();
+	output_coeff.copyHostToDevice();
+	nn.setCoeffs(input_coeff, output_coeff);
 
-	testutils::initializeTensorWithValue(X, 1.0f);
-	X[0] = 0.0165;
-	X[1] = 0.0165;
-	X[2] = 0.0371;
-
-	normalize(X, input_coeff);
 
 	Matrix a = weights[0];
 	testutils::initializeTensorWithMatrix(linear_layer_1->W, weights[0]);
@@ -56,7 +51,6 @@ int main() {
 	testutils::initializeTensorWithMatrix(linear_layer_3->b, biases[2]);
 	testutils::initializeTensorWithMatrix(linear_layer_4->b, biases[3]);
 
-	X.copyHostToDevice();
 	linear_layer_1->W.copyHostToDevice();
 	linear_layer_2->W.copyHostToDevice();
 	linear_layer_3->W.copyHostToDevice();
@@ -76,32 +70,52 @@ int main() {
 	nn.addLayer(linear_layer_4);
 	nn.addLayer(tanh_layer);
 
+	Matrix X(rows, 3);
+	X.allocateMemory();
+	Matrix Y, N;
+
 	auto start = chrono::steady_clock::now();
 	
-	Matrix Y, N;
-	nn.forward(X, Y, N);
+	testutils::initializeTensorWithValue(X, 0.5f);
+	X[0] = 0.0165;
+	X[1] = 0.0165;
+	X[2] = 0.0371; // 63 us
+
+	auto start1 = chrono::steady_clock::now();
+	normalize(X, input_coeff); // 182 us
+	auto start2 = chrono::steady_clock::now();
+	X.copyHostToDevice(); // 8 us
+	
+	auto start3 = chrono::steady_clock::now();
+	nn.forward(X, Y, N); // 1084 us
+	auto start4 = chrono::steady_clock::now();
 	Y.copyDeviceToHost();
-	N.copyDeviceToHost();
-	unnormalize(Y, output_coeff);
+	N.copyDeviceToHost();  // 2263 us
+	auto start5 = chrono::steady_clock::now();
+	unnormalize(Y, output_coeff); // 57 us
+	unnormalize_normal(N, input_coeff); // 6730 us
+
 	auto end = chrono::steady_clock::now();
 
 	cout << "Elapsed time (microseconds) : "
+		<< chrono::duration_cast<chrono::microseconds>(start1 - start).count()
+		<< " (us) "
+		<< chrono::duration_cast<chrono::microseconds>(start2 - start1).count()
+		<< " (us) "
+		<< chrono::duration_cast<chrono::microseconds>(start3 - start2).count()
+		<< " (us) "
+		<< chrono::duration_cast<chrono::microseconds>(start4 - start3).count()
+		<< " (us) "
+		<< chrono::duration_cast<chrono::microseconds>(start5 - start4).count()
+		<< " (us) "
+		<< chrono::duration_cast<chrono::microseconds>(end - start5).count()
+		<< " (us) " << endl
+		<< "Total: "
 		<< chrono::duration_cast<chrono::microseconds>(end - start).count()
 		<< " (us) " << endl;
 
+
 	cout << "shape: " << N.shape.x << ", " << N.shape.y << endl;
-
-	cout << N[0] << ", "
-		<< N[1]  << ", "
-		<< N[2]  << ", "
-		<< N[3]  << ", "
-		<< N[4]  << ", "
-		<< N[60]  << ", "
-		<< N[61]  << ", "
-		<< N[62]  << ", "
-		<< N[63]  << ", "
-		<< endl;
-
 
 	return 0;
 }

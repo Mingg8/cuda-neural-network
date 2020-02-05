@@ -65,7 +65,7 @@ Matrix& TanhActivation::forward(Matrix& Z) {
 
 Matrix& TanhActivation::normal(Matrix& Z_n) {
 	this->Z_n = Z_n;
-	A_n.allocateMemoryIfNotAllocated(Z_n.shape);
+	A_n.allocateMemoryIfNotAllocated(Shape(Z_n.shape.y, Z_n.shape.x));
 
 	dim3 block_size(256);
 	dim3 num_of_blocks((Z_n.shape.y * Z_n.shape.x + block_size.x - 1) / block_size.x);

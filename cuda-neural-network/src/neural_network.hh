@@ -11,7 +11,12 @@ private:
 
 	Matrix Y;
 	Matrix dY;
+
+	Matrix pnts;
+	Matrix normalized_pnts;
+
 	float learning_rate;
+	Matrix input_coeff, output_coeff;
 
 public:
 	NeuralNetwork(float learning_rate = 0.01);
@@ -22,6 +27,8 @@ public:
 	void backprop(Matrix predictions, Matrix target);
 
 	void addLayer(NNLayer *layer);
+	void setCoeffs(Matrix& input, Matrix& output);
 	std::vector<NNLayer*> getLayers() const;
+	Matrix normalize(Matrix& pnts);
 
 };

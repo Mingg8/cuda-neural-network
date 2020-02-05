@@ -15,6 +15,7 @@ public:
 	~ReLUActivation();
 
 	Matrix& forward(Matrix& Z);
-	Matrix& normal(Matrix& Z_n);
+	Matrix& normal(Matrix& Z_n){return A;};
+	Matrix& normal_relu(Matrix& Z_n, Matrix& dh);
 	Matrix& backprop(Matrix& dA, float learning_rate = 0.01);
 };

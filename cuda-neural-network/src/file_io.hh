@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -13,3 +14,4 @@ Matrix readCsv_last(std::string file, int rows);
 Matrix readCsv_vec_last(std::string file);
 void normalize(Matrix &pnts, Matrix input_coeff);
 void unnormalize(Matrix &output, Matrix output_coeff);
+void unnormalize_normal(Matrix &output, Matrix input_coeff);
