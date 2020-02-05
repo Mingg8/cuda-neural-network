@@ -24,8 +24,8 @@ int main() {
 	nn.addLayer(new ReLUActivation("relu_1"));
 	nn.addLayer(new LinearLayer("linear_2", Shape(64, 64)));
 	nn.addLayer(new ReLUActivation("sigmoid_output"));
-	nn.addLayer(new LinearLayer("linear_3", shape(64, 64)));
-	nn.addLayer(new TanhLayer("tanh_output"));
+	nn.addLayer(new LinearLayer("linear_3", Shape(64, 64)));
+	nn.addLayer(new SigmoidActivation("tanh_output"));
 
 	// network training
 	Matrix Y;
