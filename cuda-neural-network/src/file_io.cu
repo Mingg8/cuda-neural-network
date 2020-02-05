@@ -13,10 +13,6 @@ void loadWeight(std::vector<Matrix> &weight, std::vector<Matrix> &bias) {
     std::string file = dir + std::string("/weight") + std::to_string(num) + std::string(".csv");
 	num++;
     Matrix W = readCsv(file, 3, 64);
-    cout << W[0] << ", " 
-        << W[1] << ", "
-        << W[2] << ", "
-        << W[3] << ", " << endl;
 
     file = dir + std::string("/weight") + to_string(num) + std::string(".csv");
     num++;
@@ -79,8 +75,6 @@ Matrix readCsv(std::string file, int rows, int cols) {
         }
         in.close();
 	}
-	
-	// W.copyHostToDevice();
     return res;
 }
 
@@ -104,14 +98,15 @@ Matrix readCsv_last(std::string file, int rows) {
             for (int i = 0; i < len; i++) {
                 if (ptr[i] == ',') {
 					if (col == 0) {
-						res[row * res.shape.x + col] = (float)atof(start); 
+						res[row * res.shape.y + col] = (float)atof(start); 
 					}
 					col++;
                     start = ptr + 1 + i;
                 }
             }
-			res[row * res.shape.x + col] = (float)atof(start);
-			break;
+            res[row * res.shape.x + col] = (float)atof(start);
+            row++;
+            col++;
         }
         in.close();
 	}
