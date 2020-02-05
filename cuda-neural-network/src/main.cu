@@ -1,5 +1,6 @@
-#include <iostream>
+	#include <iostream>
 #include <time.h>
+#include <chrono>
 
 #include "neural_network.hh"
 #include "layers/linear_layer.hh"
@@ -36,7 +37,7 @@ int main() {
 	nn.initializeWeights(weights, biases);
 
 	// // compute accuracy
-	int rows = 4000, cols = 3;
+	int rows = 1, cols = 3;
 	Matrix pnts(rows, cols);
 	pnts.allocateMemory();
 	for (size_t i = 0; i < rows; i++) {
@@ -44,11 +45,18 @@ int main() {
 			pnts[cols * i + j] = 1.0;
 		}
 	}
+	pnts.copyHostToDevice();
 
 	Matrix Y;
+
+	auto start = chrono::steady_clock::now();
 	Y = nn.forward(pnts);
+	auto end = chrono::steady_clock::now();
 	Y.copyDeviceToHost();
-	cout << Y[0] << ", " << Y[1] << ", " << Y[2] << endl;
+	// cout << Y[0] << ", " << Y[1] << ", " << Y[2] << endl;
+    cout << "Elapsed time in microseconds: "
+	<< chrono::duration_cast<chrono::microseconds> (end - start).count()
+	<< " us" << endl;
 
 	return 0;
 }

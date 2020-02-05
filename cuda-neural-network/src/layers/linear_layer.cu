@@ -6,6 +6,8 @@
 #include "linear_layer.hh"
 #include "../nn_utils/nn_exception.hh"
 
+using namespace std;
+
 __global__ void linearLayerForward( float* W, float* A, float* Z, float* b,
 									int W_x_dim, int W_y_dim,
 									int A_x_dim, int A_y_dim) {
@@ -17,6 +19,10 @@ __global__ void linearLayerForward( float* W, float* A, float* Z, float* b,
 	int Z_y_dim = W_y_dim;
 
 	float Z_value = 0;
+	if (row == 0 && col == 0) {
+		printf("%f\n", A[0]);
+		printf("%f\n", W[0]);
+	}
 
 	if (row < Z_y_dim && col < Z_x_dim) {
 		for (int i = 0; i < W_x_dim; i++) {
@@ -24,7 +30,7 @@ __global__ void linearLayerForward( float* W, float* A, float* Z, float* b,
 		}
 		Z[row * Z_x_dim + col] = Z_value + b[row];
 	}
-}
+ }
 
 __global__ void linearLayerBackprop(float* W, float* dZ, float *dA,
 									int W_x_dim, int W_y_dim,
@@ -70,12 +76,6 @@ __global__ void linearLayerUpdateWeights(  float* dZ, float* A, float* W,
 	}
 }
 
-__global__ void linearLayerSetWeights(float* W, float* W_input, int W_x_dim) {
-	int col = blockIdx.x * blockDim.x + threadIdx.x;
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-	W[row * W_x_dim + col] = W_input[row * W_x_dim + col];
-}
-
 __global__ void linearLayerUpdateBias(  float* dZ, float* b,
 										int dZ_x_dim, int dZ_y_dim,
 										int b_x_dim,
@@ -87,11 +87,6 @@ __global__ void linearLayerUpdateBias(  float* dZ, float* b,
 		int dZ_y = index / dZ_x_dim;
 		atomicAdd(&b[dZ_y], - learning_rate * (dZ[dZ_y * dZ_x_dim + dZ_x] / dZ_x_dim));
 	}
-}
-
-__global__ void linearLayerSetBias(float* b, float* b_input) {
-	int index = blockIdx.x * blockDim.x + threadIdx.x;
-	b[index] = b_input[index];
 }
 
 LinearLayer::LinearLayer(std::string name, Shape W_shape) :
@@ -145,12 +140,15 @@ void LinearLayer::computeAndStoreLayerOutput(Matrix& A) {
 	dim3 block_size(8, 8);
 	dim3 num_of_blocks(	(Z.shape.x + block_size.x - 1) / block_size.x,
 						(Z.shape.y + block_size.y - 1) / block_size.y);
+
+	cout << "before: " << A[0] << ", " << A[1] << endl;
 	linearLayerForward<<<num_of_blocks, block_size>>>( W.data_device.get(),
 													   A.data_device.get(),
 													   Z.data_device.get(),
 													   b.data_device.get(),
 													   W.shape.x, W.shape.y,
 													   A.shape.x, A.shape.y);
+	cout << "after: " << A[0] << ", " << A[1] << endl;
 }
 
 Matrix& LinearLayer::backprop(Matrix& dZ, float learning_rate) {
@@ -192,12 +190,16 @@ void LinearLayer::updateWeights(Matrix& dZ, float learning_rate) {
 }
 
 void LinearLayer::initializeWeight(Matrix W_input) {
-	dim3 block_size(8, 8);
-	dim3 num_of_blocks( (W_input.shape.x + block_size.x - 1) / block_size.x,
-						(W_input.shape.y + block_size.y - 1) / block_size.y);
-	linearLayerSetWeights<<<num_of_blocks, block_size>>>(W.data_device.get(),
-														W_input.data_device.get(),
-														W.shape.x);
+
+	std::default_random_engine generator;
+
+	for (int x = 0; x < W.shape.x; x++) {
+		for (int y = 0; y < W.shape.y; y++) {
+			W[y * W.shape.x + x] = W_input[y * W.shape.x + x];
+		}
+	}
+
+	W.copyHostToDevice();
 }
 
 void LinearLayer::updateBias(Matrix& dZ, float learning_rate) {
@@ -207,15 +209,13 @@ void LinearLayer::updateBias(Matrix& dZ, float learning_rate) {
 														 b.data_device.get(),
 														 dZ.shape.x, dZ.shape.y,
 														 b.shape.x, learning_rate);
-	W.copyHostToDevice();
 }
 
 void LinearLayer::initializeBias(Matrix b_input) {
-	dim3 block_size(256);
-	dim3 num_of_blocks( (b_input.shape.y * b_input.shape.x + block_size.x - 1) / block_size.x);
-	linearLayerSetBias<<<num_of_blocks, block_size>>> (b.data_device.get(),
-															b_input.data_device.get());
-	
+	for (int x = 0; x < b.shape.x; x++) {
+		b[x] = b_input[x];
+	}
+
 	b.copyHostToDevice();
 }
 

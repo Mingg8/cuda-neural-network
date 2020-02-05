@@ -97,21 +97,19 @@ Matrix readCsv_last(std::string file, int rows) {
             char *start = ptr;
             for (int i = 0; i < len; i++) {
                 if (ptr[i] == ',') {
-					if (col == 0) {
-						res[row * res.shape.y + col] = (float)atof(start); 
-					}
+                    if (col == 0) {
+                        res[row * res.shape.y + col] = (float)atof(start);
+                    }
 					col++;
                     start = ptr + 1 + i;
                 }
             }
-            res[row * res.shape.x + col] = (float)atof(start);
+			// res[row * res.shape.y + col] = (float)atof(start);
+			col++;
             row++;
-            col++;
         }
         in.close();
 	}
-	
-	// W.copyHostToDevice();
     return res;
 }
 

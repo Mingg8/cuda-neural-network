@@ -4,7 +4,7 @@ It is a simple artificial neural network implementation using CUDA technology. T
 
 ## Execution
 
-nvcc -I /usr/local/cuda/include -L /usr/local/cuda/lib main.cu nn_utils/matrix.cu nn_utils/bce_cost.cu nn_utils/shape.cu coordinates_dataset.cu neural_network.cu layers/linear_layer.cu layers/relu_activation.cu layers/sigmoid_activation.cu -std=c++11 -D_MWAITXINTRIN_H_INCLUDED
+nvcc -I /usr/local/cuda/include -L /usr/local/cuda/lib main.cu nn_utils/matrix.cu nn_utils/bce_cost.cu nn_utils/shape.cu coordinates_dataset.cu neural_network.cu layers/linear_layer.cu layers/relu_activation.cu layers/sigmoid_activation.cu file_io.cu -std=c++11 -D_MWAITXINTRIN_H_INCLUDED
 
 ## Requirements and Technical Info
 
