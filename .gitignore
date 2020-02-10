@@ -2,3 +2,4 @@ Debug
 Release
 .metadata
 RemoteSystemsTempFiles
+cuda-neural-network/build/*
