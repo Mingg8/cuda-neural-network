@@ -2,6 +2,8 @@
 #include <time.h>
 #include <vector>
 #include <chrono>
+#include <cuda.h>
+#include <cuda_runtime_api.h>
 
 #include "neural_network.hh"
 #include "layers/linear_layer.hh"
@@ -12,7 +14,7 @@
 #include "file_io.hh"
 #include "../../cuda-neural-network-test/test/test_utils.hh"
 
-#include "coordinates_dataset.hh"
+// #include "coordinates_dataset.hh"
 
 int main() {
 
