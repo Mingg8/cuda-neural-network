@@ -2,10 +2,6 @@
 #include "../nn_utils/nn_exception.hh"
 #include <iostream>
 
-// __device__ float tanh_(float x) {
-// 	return (exp(x) - exp(-x)) / (exp(x) + exp(-x));
-// }
-
 __device__ float tanh_diff(float x) {
 	float coshx = (exp(x) + exp(-x)) / 2;
 	return 1.0f / (coshx * coshx);
@@ -29,16 +25,6 @@ __global__ void tanhActivationNormal(float* Z, float* A,
 
 	if (index < Z_x_dim * Z_y_dim) {
 		A[index] = tanh_diff(Z[index]);
-	}
-}
-
-__global__ void tanhActivationBackprop(float* Z, float* dA, float* dZ,
-										  int Z_x_dim, int Z_y_dim) {
-
-	int index = blockIdx.x * blockDim.x + threadIdx.x;
-
-	if (index < Z_x_dim * Z_y_dim) {
-		dZ[index] = dA[index] * tanh(Z[index]) * (1 - tanh(Z[index]));
 	}
 }
 
@@ -75,17 +61,4 @@ Matrix& TanhActivation::normal(Matrix& Z_n) {
 	NNException::throwIfDeviceErrorsOccurred("Cannot perform tanh forward propagation.");
 
 	return A_n;
-}
-
-Matrix& TanhActivation::backprop(Matrix& dA, float learning_rate) {
-	dZ.allocateMemoryIfNotAllocated(Z.shape);
-
-	dim3 block_size(256);
-	dim3 num_of_blocks((Z.shape.y * Z.shape.x + block_size.x - 1) / block_size.x);
-	tanhActivationBackprop<<<num_of_blocks, block_size>>>(Z.data_device.get(), dA.data_device.get(),
-															 dZ.data_device.get(),
-															 Z.shape.x, Z.shape.y);
-	NNException::throwIfDeviceErrorsOccurred("Cannot perform tanh back propagation");
-
-	return dZ;
 }

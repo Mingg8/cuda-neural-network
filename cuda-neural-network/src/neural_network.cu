@@ -78,18 +78,6 @@ void NeuralNetwork::forward(Matrix Z, Matrix& output, Matrix& normal) {
 	normal = layers[0]->normal(normal);
 	normal = unnormalize_normal(normal);
 }
-
-void NeuralNetwork::backprop(Matrix predictions, Matrix target) {
-	dY.allocateMemoryIfNotAllocated(predictions.shape);
-	Matrix error = bce_cost.dCost(predictions, target, dY);
-
-	for (auto it = this->layers.rbegin(); it != this->layers.rend(); it++) {
-		error = (*it)->backprop(error, learning_rate);
-	}
-
-	cudaDeviceSynchronize();
-}
-
 std::vector<NNLayer*> NeuralNetwork::getLayers() const {
 	return layers;
 }

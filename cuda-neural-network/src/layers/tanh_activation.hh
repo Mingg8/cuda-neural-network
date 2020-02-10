@@ -16,5 +16,5 @@ public:
 	Matrix& forward(Matrix& Z);
 	Matrix& normal(Matrix& Z);
 	Matrix& normal_relu(Matrix& Z_n, Matrix& dh){return A;};
-	Matrix& backprop(Matrix& dA, float learning_rate = 0.01);
+
 };

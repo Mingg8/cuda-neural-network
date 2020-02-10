@@ -10,7 +10,6 @@
 #include "layers/relu_activation.hh"
 #include "layers/tanh_activation.hh"
 #include "nn_utils/nn_exception.hh"
-#include "nn_utils/bce_cost.hh"
 #include "file_io.hh"
 #include "../../cuda-neural-network-test/test/test_utils.hh"
 
