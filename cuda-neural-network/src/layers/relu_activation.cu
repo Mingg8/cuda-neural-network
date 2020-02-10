@@ -46,7 +46,7 @@ ReLUActivation::ReLUActivation(std::string name) {
 ReLUActivation::~ReLUActivation() { }
 
 Matrix& ReLUActivation::forward(Matrix& Z) {
-	this->Z = Z;
+	// this->Z = Z;
 	A.allocateMemoryIfNotAllocated(Z.shape);
 
 	dim3 block_size(256);
@@ -61,8 +61,8 @@ Matrix& ReLUActivation::forward(Matrix& Z) {
 
 Matrix& ReLUActivation::normal_relu(Matrix& Z_n, Matrix& dh) {
 	// relu_diff(Z_n)' .* dh
-	this->Z_n = Z_n;
-	this->dh = dh;
+	// this->Z_n = Z_n;
+	// this->dh = dh;
 	A_n.allocateMemoryIfNotAllocated(dh.shape);
 
 	dim3 block_size(8, 8);

@@ -141,8 +141,6 @@ void LinearLayer::initializeBiasWithZeros() {
 
 Matrix& LinearLayer::forward(Matrix& A) {
 	assert(W.shape.x == A.shape.y);
-
-	this->A = A;
 	Shape Z_shape(A.shape.x, W.shape.y);
 	Z.allocateMemoryIfNotAllocated(Z_shape);
 
@@ -154,8 +152,6 @@ Matrix& LinearLayer::forward(Matrix& A) {
 
 Matrix& LinearLayer::normal(Matrix& N) {
 	assert(W.shape.y == N.shape.x);
-
-	this->N = N;
 	Shape Z_shape(W.shape.x, N.shape.y);
 	Z_n.allocateMemoryIfNotAllocated(Z_shape);
 

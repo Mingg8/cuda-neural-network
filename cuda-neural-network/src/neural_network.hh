@@ -12,9 +12,6 @@ private:
 	Matrix Y;
 	Matrix dY;
 
-	Matrix pnts;
-	Matrix normalized_pnts;
-
 	float learning_rate;
 	Matrix input_coeff, output_coeff;
 
@@ -30,5 +27,7 @@ public:
 	void setCoeffs(Matrix& input, Matrix& output);
 	std::vector<NNLayer*> getLayers() const;
 	Matrix normalize(Matrix& pnts);
+	Matrix unnormalize(Matrix &pnts);
+	Matrix unnormalize_normal(Matrix &pnts);
 
 };

@@ -161,32 +161,3 @@ Matrix readCsv_vec_last(std::string file) {
     }
     return res;
 }
-
-void normalize(Matrix &pnts, Matrix input_coeff) {
-    for (size_t i = 0; i < pnts.shape.x; i++) {
-        for (size_t j = 0; j < pnts.shape.y; j++) {
-            pnts[i * pnts.shape.y + j] = pnts[i * pnts.shape.y + j]
-                * input_coeff[j] + input_coeff[j + 3];
-        }
-    }
-}
-
-void unnormalize(Matrix &output, Matrix output_coeff) {
-    for (size_t i = 0; i < output.shape.x; i++) {
-        output[i] = (output[i] - output_coeff[4]) / output_coeff[0];
-    }
-}
-
-void unnormalize_normal(Matrix &output, Matrix input_coeff) {
-    for (size_t i = 0; i < output.shape.y; i++) {
-        float sum = 0.0f;
-        for (size_t j =0 ; j < output.shape.x; j++) {
-            float a = output[j * output.shape.y + i] * input_coeff[j];
-            output[j * output.shape.x + i] = a;
-            sum += a * a;
-        }
-        for (size_t j =0 ; j < output.shape.x; j++) {
-            output[j * output.shape.x + i] /= sqrt(sum);
-        }
-    }
-}
