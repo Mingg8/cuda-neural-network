@@ -4,17 +4,17 @@
 
 class ReLUActivation : public NNLayer {
 private:
-	Matrix A, A_n;
+	matrix::Matrix A, A_n;
 
-	Matrix Z, Z_n;
-	Matrix dZ;
-	Matrix dh;
+	matrix::Matrix Z, Z_n;
+	matrix::Matrix dZ;
+	matrix::Matrix dh;
 
 public:
 	ReLUActivation(std::string name);
 	~ReLUActivation();
 
-	Matrix& forward(Matrix& Z);
-	Matrix& normal(Matrix& Z_n){return A;};
-	Matrix& normal_relu(Matrix& Z_n, Matrix& dh);
+	matrix::Matrix& forward(matrix::Matrix& Z);
+	matrix::Matrix& normal(matrix::Matrix& Z_n){return A;};
+	matrix::Matrix& normal_relu(matrix::Matrix& Z_n, matrix::Matrix& dh);
 };

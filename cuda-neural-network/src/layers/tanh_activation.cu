@@ -35,7 +35,7 @@ TanhActivation::TanhActivation(std::string name) {
 TanhActivation::~TanhActivation()
 { }
 
-Matrix& TanhActivation::forward(Matrix& Z) {
+matrix::Matrix& TanhActivation::forward(matrix::Matrix& Z) {
 	// this->Z = Z;
 	A.allocateMemoryIfNotAllocated(Z.shape);
 
@@ -49,7 +49,7 @@ Matrix& TanhActivation::forward(Matrix& Z) {
 	return A;
 }
 
-Matrix& TanhActivation::normal(Matrix& Z_n) {
+matrix::Matrix& TanhActivation::normal(matrix::Matrix& Z_n) {
 	// this->Z_n = Z_n;
 	A_n.allocateMemoryIfNotAllocated(Shape(Z_n.shape.y, Z_n.shape.x));
 

@@ -7,23 +7,27 @@ class NeuralNetwork {
 private:
 	std::vector<NNLayer*> layers;
 
-	Matrix Y;
-	Matrix dY;
+	matrix::Matrix Y;
+	matrix::Matrix dY;
 
 	float learning_rate;
-	Matrix input_coeff, output_coeff;
+	matrix::Matrix input_coeff, output_coeff;
+
+	matrix::Matrix normalize(matrix::Matrix& pnts);
+	matrix::Matrix unnormalize(matrix::Matrix &pnts);
+	matrix::Matrix unnormalize_normal(matrix::Matrix &pnts);
+	matrix::Matrix transform(matrix::Matrix &pnts, matrix::Matrix &rot, 
+		matrix::Matrix &trans);
 
 public:
 	NeuralNetwork(float learning_rate = 0.01);
 	~NeuralNetwork();
 
-	void forward(Matrix X, Matrix& output, Matrix& normal);
+	void forward(matrix::Matrix X, matrix::Matrix& output, matrix::Matrix& normal,
+		matrix::Matrix rot, matrix::Matrix trans);
 
 	void addLayer(NNLayer *layer);
-	void setCoeffs(Matrix& input, Matrix& output);
+	void setCoeffs(matrix::Matrix& input, matrix::Matrix& output);
 	std::vector<NNLayer*> getLayers() const;
-	Matrix normalize(Matrix& pnts);
-	Matrix unnormalize(Matrix &pnts);
-	Matrix unnormalize_normal(Matrix &pnts);
 
 };

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void loadWeight(std::vector<Matrix> &weight, std::vector<Matrix> &bias) {
+void loadWeight(std::vector<matrix::Matrix> &weight, std::vector<matrix::Matrix> &bias) {
 	std::string dir = "/home/mjlee/workspace/NutLearning/old_results/2020-01-29_20:02_hdim_64/weight_csv";
 	int lnum = 2;
 	int hdim = 64;
@@ -12,11 +12,11 @@ void loadWeight(std::vector<Matrix> &weight, std::vector<Matrix> &bias) {
 
     std::string file = dir + std::string("/weight") + std::to_string(num) + std::string(".csv");
 	num++;
-    Matrix W = readCsv(file, 3, 64);
+    matrix::Matrix W = readCsv(file, 3, 64);
 
     file = dir + std::string("/weight") + to_string(num) + std::string(".csv");
     num++;
-    Matrix b = readCsv_vec(file, hdim);
+    matrix::Matrix b = readCsv_vec(file, hdim);
 
     weight.push_back(W);
     bias.push_back(b);
@@ -45,7 +45,7 @@ void loadWeight(std::vector<Matrix> &weight, std::vector<Matrix> &bias) {
     bias.push_back(b);
 }
 
-void loadNormalizationCoeff(Matrix& input_coeff, Matrix& output_coeff) {
+void loadNormalizationCoeff(matrix::Matrix& input_coeff, matrix::Matrix& output_coeff) {
 	std::string dir = "/home/mjlee/workspace/NutLearning/old_results/2020-01-29_20:02_hdim_64/weight_csv";
     string file_input = dir + string("/input_coeff.csv");
     string file_output = dir + string("/output_coeff.csv");
@@ -54,14 +54,14 @@ void loadNormalizationCoeff(Matrix& input_coeff, Matrix& output_coeff) {
 }
 
 
-Matrix readCsv(std::string file, int rows, int cols) {
+matrix::Matrix readCsv(std::string file, int rows, int cols) {
     ifstream in(file);
     string line;
 
     int row = 0;
     int col = 0;
     
-	Matrix res(rows, cols);
+	matrix::Matrix res(rows, cols);
 	res.allocateMemory();
     if (in.is_open()) {
         while (std::getline(in, line)) {
@@ -87,14 +87,14 @@ Matrix readCsv(std::string file, int rows, int cols) {
     return res;
 }
 
-Matrix readCsv_last(std::string file, int rows) {
+matrix::Matrix readCsv_last(std::string file, int rows) {
     ifstream in(file);
     string line;
 
     int row = 0;
     int col = 0;
     
-	Matrix res(rows, 1);
+	matrix::Matrix res(rows, 1);
 	res.allocateMemory();
     if (in.is_open()) {
         while (std::getline(in, line)) {
@@ -122,13 +122,13 @@ Matrix readCsv_last(std::string file, int rows) {
     return res;
 }
 
-Matrix readCsv_vec(std::string file, int rows) {
+matrix::Matrix readCsv_vec(std::string file, int rows) {
     ifstream in(file);
     std::string line;
 
     int row = 0;
 
-	Matrix res(rows, 1);
+	matrix::Matrix res(rows, 1);
 	res.allocateMemory();
 
     if (in.is_open()) {
@@ -142,13 +142,13 @@ Matrix readCsv_vec(std::string file, int rows) {
     return res;
 }
 
-Matrix readCsv_vec_last(std::string file) {
+matrix::Matrix readCsv_vec_last(std::string file) {
     ifstream in(file);
     std::string line;
 
     int row = 0;
 
-	Matrix res(1, 1);
+	matrix::Matrix res(1, 1);
 	res.allocateMemory();
 
     if (in.is_open()) {

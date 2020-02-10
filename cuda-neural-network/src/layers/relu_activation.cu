@@ -30,7 +30,7 @@ ReLUActivation::ReLUActivation(std::string name) {
 
 ReLUActivation::~ReLUActivation() { }
 
-Matrix& ReLUActivation::forward(Matrix& Z) {
+matrix::Matrix& ReLUActivation::forward(matrix::Matrix& Z) {
 	// this->Z = Z;
 	A.allocateMemoryIfNotAllocated(Z.shape);
 
@@ -44,7 +44,7 @@ Matrix& ReLUActivation::forward(Matrix& Z) {
 	return A;
 }
 
-Matrix& ReLUActivation::normal_relu(Matrix& Z_n, Matrix& dh) {
+matrix::Matrix& ReLUActivation::normal_relu(matrix::Matrix& Z_n, matrix::Matrix& dh) {
 	// relu_diff(Z_n)' .* dh
 	// this->Z_n = Z_n;
 	// this->dh = dh;

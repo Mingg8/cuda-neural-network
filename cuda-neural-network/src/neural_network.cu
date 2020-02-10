@@ -40,6 +40,21 @@ __global__ void normal_unnormalization(float* pnts, float* coeff, float* n_pnts,
 	}
 }
 
+__global__ void transformation(float* pnts, float* rot, float* trans, float* n_pnts,
+	int x, int y) {
+	int index = blockIdx.x * blockDim.x + threadIdx.x;
+
+	if (index < x) {
+		for (size_t i = 0; i < 3; i++) {
+			float sum = 0.0f;
+			for (size_t j = 0; j < 3; j++) {
+				sum += pnts[y * index + j] * rot[i * 3 + j];
+			}
+			n_pnts[y * index + i] = sum + trans[i];
+		}
+	}
+}
+
 NeuralNetwork::NeuralNetwork(float learning_rate) :
 	learning_rate(learning_rate)
 { }
@@ -54,16 +69,18 @@ void NeuralNetwork::addLayer(NNLayer* layer) {
 	this->layers.push_back(layer);
 }
 
-void NeuralNetwork::forward(Matrix Z, Matrix& output, Matrix& normal) {
+void NeuralNetwork::forward(matrix::Matrix Z, matrix::Matrix& output, matrix::Matrix& normal,
+	matrix::Matrix rot, matrix::Matrix trans) {
 	Z.copyHostToDevice();
+	Z = this->transform(Z, rot, trans);
 	Z = this->normalize(Z); // 18 us
 
-	Matrix a1 = layers[0]->forward(Z);
-	Matrix a2 = layers[1]->forward(a1); // 326
+	matrix::Matrix a1 = layers[0]->forward(Z);
+	matrix::Matrix a2 = layers[1]->forward(a1); // 326
 	a2 = layers[2]->forward(a2); 
-	Matrix a3 = layers[3]->forward(a2); // 321
+	matrix::Matrix a3 = layers[3]->forward(a2); // 321
 	a3 = layers[4]->forward(a3);
-	Matrix a4 = layers[5]->forward(a3); // 319
+	matrix::Matrix a4 = layers[5]->forward(a3); // 319
 	a4 = layers[6]->forward(a4);
 	output = layers[7]->forward(a4); // 18
 	output = this->unnormalize(output);
@@ -83,13 +100,13 @@ std::vector<NNLayer*> NeuralNetwork::getLayers() const {
 }
 
 
-void NeuralNetwork::setCoeffs(Matrix& input, Matrix& output) {
+void NeuralNetwork::setCoeffs(matrix::Matrix& input, matrix::Matrix& output) {
 	input_coeff = input;
 	output_coeff = output;
 }
 
-Matrix NeuralNetwork::normalize(Matrix &pnts) {
-	Matrix normalized_pnts;
+matrix::Matrix NeuralNetwork::normalize(matrix::Matrix &pnts) {
+	matrix::Matrix normalized_pnts;
 	normalized_pnts.allocateMemoryIfNotAllocated(pnts.shape);
 
 	dim3 block_size(8, 8);
@@ -102,8 +119,8 @@ Matrix NeuralNetwork::normalize(Matrix &pnts) {
 	return normalized_pnts;
 }
 
-Matrix NeuralNetwork::unnormalize(Matrix &pnts) {
-	Matrix normalized_pnts;
+matrix::Matrix NeuralNetwork::unnormalize(matrix::Matrix &pnts) {
+	matrix::Matrix normalized_pnts;
 	normalized_pnts.allocateMemoryIfNotAllocated(pnts.shape);
 	dim3 block_size(256);
 	dim3 num_of_blocks((pnts.shape.y * pnts.shape.x + block_size.x - 1) / block_size.x);
@@ -114,13 +131,31 @@ Matrix NeuralNetwork::unnormalize(Matrix &pnts) {
 	return normalized_pnts;
 }
 
-Matrix NeuralNetwork::unnormalize_normal(Matrix &pnts) {
-	Matrix normalized_pnts;
+matrix::Matrix NeuralNetwork::unnormalize_normal(matrix::Matrix &pnts) {
+	matrix::Matrix normalized_pnts;
 	normalized_pnts.allocateMemoryIfNotAllocated(pnts.shape);
 	dim3 block_size(256);
 	dim3 num_of_blocks((pnts.shape.y + block_size.x - 1) / block_size.x);
 	normal_unnormalization<<<num_of_blocks, block_size>>>(pnts.data_device.get(),
 												input_coeff.data_device.get(),
+												normalized_pnts.data_device.get(),
+												pnts.shape.x, pnts.shape.y);
+	return normalized_pnts;
+}
+
+matrix::Matrix NeuralNetwork::transform(matrix::Matrix &pnts, matrix::Matrix &rot,
+	matrix::Matrix &trans) {
+	matrix::Matrix normalized_pnts;
+	normalized_pnts.allocateMemoryIfNotAllocated(pnts.shape);
+
+	rot.copyHostToDevice();
+	trans.copyHostToDevice();
+
+	dim3 block_size(256);
+	dim3 num_of_blocks((pnts.shape.y + block_size.x - 1) / block_size.x);
+	transformation<<<num_of_blocks, block_size>>>(pnts.data_device.get(),
+												rot.data_device.get(),
+												trans.data_device.get(),
 												normalized_pnts.data_device.get(),
 												pnts.shape.x, pnts.shape.y);
 	return normalized_pnts;

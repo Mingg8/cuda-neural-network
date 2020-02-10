@@ -1,6 +1,7 @@
 #include "matrix.hh"
 #include "nn_exception.hh"
 
+namespace matrix {
 Matrix::Matrix(size_t x_dim, size_t y_dim) :
 	shape(x_dim, y_dim), data_device(nullptr), data_host(nullptr),
 	device_allocated(false), host_allocated(false)
@@ -67,4 +68,5 @@ float& Matrix::operator[](const int index) {
 
 const float& Matrix::operator[](const int index) const {
 	return data_host.get()[index];
+}
 }

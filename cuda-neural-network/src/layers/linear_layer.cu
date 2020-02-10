@@ -60,7 +60,7 @@ LinearLayer::LinearLayer(std::string name, Shape W_shape) :
 LinearLayer::~LinearLayer()
 { }
 
-Matrix& LinearLayer::forward(Matrix& A) {
+matrix::Matrix& LinearLayer::forward(matrix::Matrix& A) {
 	assert(W.shape.x == A.shape.y);
 	Shape Z_shape(A.shape.x, W.shape.y);
 	Z.allocateMemoryIfNotAllocated(Z_shape);
@@ -71,7 +71,7 @@ Matrix& LinearLayer::forward(Matrix& A) {
 	return Z;
 }
 
-Matrix& LinearLayer::normal(Matrix& N) {
+matrix::Matrix& LinearLayer::normal(matrix::Matrix& N) {
 	assert(W.shape.y == N.shape.x);
 	Shape Z_shape(W.shape.x, N.shape.y);
 	Z_n.allocateMemoryIfNotAllocated(Z_shape);
@@ -82,7 +82,7 @@ Matrix& LinearLayer::normal(Matrix& N) {
 	return Z_n;
 }
 
-void LinearLayer::computeAndStoreLayerOutput_normal(Matrix& N) {
+void LinearLayer::computeAndStoreLayerOutput_normal(matrix::Matrix& N) {
 	dim3 block_size(8, 8);
 	dim3 num_of_blocks(	(Z_n.shape.x + block_size.x - 1) / block_size.x,
 						(Z_n.shape.y + block_size.y - 1) / block_size.y);
@@ -95,7 +95,7 @@ void LinearLayer::computeAndStoreLayerOutput_normal(Matrix& N) {
 													   N.shape.x, N.shape.y);
 }
 
-void LinearLayer::computeAndStoreLayerOutput(Matrix& A) {
+void LinearLayer::computeAndStoreLayerOutput(matrix::Matrix& A) {
 	dim3 block_size(8, 8);
 	dim3 num_of_blocks(	(Z.shape.x + block_size.x - 1) / block_size.x,
 						(Z.shape.y + block_size.y - 1) / block_size.y);
@@ -116,10 +116,10 @@ int LinearLayer::getYDim() const {
 	return W.shape.y;
 }
 
-Matrix LinearLayer::getWeightsMatrix() const {
+matrix::Matrix LinearLayer::getWeightsMatrix() const {
 	return W;
 }
 
-Matrix LinearLayer::getBiasVector() const {
+matrix::Matrix LinearLayer::getBiasVector() const {
 	return b;
 }

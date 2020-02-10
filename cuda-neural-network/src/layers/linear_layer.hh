@@ -14,33 +14,33 @@ class LinearLayer : public NNLayer {
 private:
 	const float weights_init_threshold = 0.01;
 
-	Matrix Z;
-	Matrix Z_n;
-	Matrix N;
-	Matrix A;
-	Matrix dA;
+	matrix::Matrix Z;
+	matrix::Matrix Z_n;
+	matrix::Matrix N;
+	matrix::Matrix A;
+	matrix::Matrix dA;
 
-	void computeAndStoreLayerOutput(Matrix& A);
-	void computeAndStoreLayerOutput_normal(Matrix& A);
-	void updateWeights(Matrix& dZ, float learning_rate);
-	void updateBias(Matrix& dZ, float learning_rate);
+	void computeAndStoreLayerOutput(matrix::Matrix& A);
+	void computeAndStoreLayerOutput_normal(matrix::Matrix& A);
+	void updateWeights(matrix::Matrix& dZ, float learning_rate);
+	void updateBias(matrix::Matrix& dZ, float learning_rate);
 
 public:
 	LinearLayer(std::string name, Shape W_shape);
 	~LinearLayer();
 
-	Matrix W;
-	Matrix b;
+	matrix::Matrix W;
+	matrix::Matrix b;
 
-	Matrix& forward(Matrix& A);
-	Matrix& normal(Matrix& N);
-	Matrix& normal_relu(Matrix& Z_n, Matrix& dh){return Z;};
+	matrix::Matrix& forward(matrix::Matrix& A);
+	matrix::Matrix& normal(matrix::Matrix& N);
+	matrix::Matrix& normal_relu(matrix::Matrix& Z_n, matrix::Matrix& dh){return Z;};
 
 	int getXDim() const;
 	int getYDim() const;
 
-	Matrix getWeightsMatrix() const;
-	Matrix getBiasVector() const;
+	matrix::Matrix getWeightsMatrix() const;
+	matrix::Matrix getBiasVector() const;
 
 	// for unit testing purposes only
 	friend class LinearLayerTest_ShouldReturnOutputAfterForwardProp_Test;

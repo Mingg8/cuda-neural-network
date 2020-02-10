@@ -4,6 +4,7 @@
 
 #include <memory>
 
+namespace matrix{
 class Matrix {
 private:
 	bool device_allocated;
@@ -30,3 +31,4 @@ public:
 	float& operator[](const int index);
 	const float& operator[](const int index) const;
 };
+}

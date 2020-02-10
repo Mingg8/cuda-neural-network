@@ -6,12 +6,12 @@
 
 using namespace std;
 
-void loadWeight(std::vector<Matrix> &weight, std::vector<Matrix> &bias);
-void loadNormalizationCoeff(Matrix& input_coeff, Matrix& output_coeff);
-Matrix readCsv(std::string file, int rows, int cols);
-Matrix readCsv_vec(std::string file, int rows);
-Matrix readCsv_last(std::string file, int rows);
-Matrix readCsv_vec_last(std::string file);
-void normalize(Matrix &pnts, Matrix input_coeff);
-void unnormalize(Matrix &output, Matrix output_coeff);
-void unnormalize_normal(Matrix &output, Matrix input_coeff);
+void loadWeight(std::vector<matrix::Matrix> &weight, std::vector<matrix::Matrix> &bias);
+void loadNormalizationCoeff(matrix::Matrix& input_coeff, matrix::Matrix& output_coeff);
+matrix::Matrix readCsv(std::string file, int rows, int cols);
+matrix::Matrix readCsv_vec(std::string file, int rows);
+matrix::Matrix readCsv_last(std::string file, int rows);
+matrix::Matrix readCsv_vec_last(std::string file);
+void normalize(matrix::Matrix &pnts, matrix::Matrix input_coeff);
+void unnormalize(matrix::Matrix &output, matrix::Matrix output_coeff);
+void unnormalize_normal(matrix::Matrix &output, matrix::Matrix input_coeff);

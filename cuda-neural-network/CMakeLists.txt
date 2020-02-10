@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 find_package(CUDA REQUIRED)
 find_package(Eigen3 REQUIRED)   
 
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 set (CUDA_SEPARABLE_COMPILATION ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -17,6 +16,7 @@ file(GLOB
     src/layers/*.cu
     src/nn_utils/*.cu
     src/*.cu
-    src/main.cpp)
+    src/main.cpp
+    src/*.cpp)
 
 cuda_add_executable(main ${SRC_FILES})
